@@ -1,10 +1,25 @@
+from flask import Flask
+from threading import Thread
 import os
 import discord
 from discord.ext import commands
 
+# --- كود عشان رندر ما يفصل ---
+app = Flask('')
+@app.route('/')
+def home():
+    return "Hayato is online!"
+
+def run():
+    app.run(host='0.0.0.0', port=10000)
+
+Thread(target=run).start()
+# --------------------------------
+
 intents = discord.Intents.default()
 intents.message_content = True
 intents.messages = True
+intents.guilds = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
@@ -14,20 +29,17 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    if message.author.bot:
+    if message.author == bot.user:
         return
-    
-    # مانع الروابط
-    if "http://" in message.content or "https://" in message.content or "discord.gg" in message.content:
-        if not message.author.guild_permissions.manage_messages:
-            await message.delete()
-            await message.channel.send(f"{message.author.mention} ممنوع نشر الروابط!", delete_after=5)
-            return
-            
+
+    # رد تلقائي
+    if "احبك" in message.content.lower() or "أحبك" in message.content.lower():
+        await message.channel.send(f"حبك برص {message.author.mention} 😂")
+
     await bot.process_commands(message)
 
 @bot.command()
 async def ping(ctx):
-    await ctx.send("البوت شغال 24 ساعة! ✅")
+    await ctx.send("Pong! 🏓")
 
 bot.run(os.getenv("TOKEN"))
